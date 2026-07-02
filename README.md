@@ -1,50 +1,84 @@
 # Multica OpenSpec Agent Templates
 
-用于在 Multica 中创建 OpenSpec 产品研发智能体的 Markdown 模板集合。
+用于在 Multica 中创建围绕 OpenSpec 官方命令工作的智能体模板。
 
-本仓库提供两套配置：
+本仓库已经移除旧版“手动生成 OpenSpec proposal/spec/design/tasks”的模板，统一改为官方命令流程：
 
-- **7 智能体完整版**：覆盖产品需求分析、OpenSpec 规格、技术设计、任务拆解、开发执行、验收质量与主协调。
-- **4 智能体轻量版**：覆盖需求澄清、OpenSpec 变更设计、代码实现与交付验收。
+1. 先在 Multica 中选定要运行的 AI client/runtime。
+2. 用户进入目标项目根目录，手动运行 `openspec init`。
+3. 后续只通过 OpenSpec 的 `propose`、`apply`、`archive` 三类动作推进 change；具体斜杠命令以当前 AI client 实际注册的命令为准。
+4. Multica 智能体负责整理上下文、协调分工、审查风险，并通过 Squad 自动 `@mention` 下游智能体；但不替代 `openspec init`。
 
 ## 文档
 
-- [完整版智能体配置](docs/multica-agent-manual-openspec-prd.md)
-- [轻量四智能体配置](docs/multica-agent-lite-4-openspec.md)
+- [OpenSpec 智能体配置指南](docs/multica-openspec-agent-guide.md)
 - [Issue 示例提示词](examples/sample-issue-prompts.md)
 
 ## 适用场景
 
 - 在 Multica 中手动创建产品研发智能体。
-- 使用 `@mention` 按阶段调用智能体。
-- 使用 Squad 自动流转 OpenSpec 工作流。
-- 将 PRD、OpenSpec proposal、Delta specs、design、tasks、代码实现、verify 串成稳定协作流程。
+- 使用 Squad 自动流转 OpenSpec 官方命令。
+- Leader 通过精确 `@mention` 自动调用当前阶段需要的成员。
+- 将需求上下文、`propose`、`apply`、`archive` 串成稳定协作流程。
+
+## 初始化前提
+
+OpenSpec 初始化不是自动创建步骤，也不应由智能体静默完成。用户必须先手动 init，之后小队才能自动流转。
+
+正确顺序：
+
+```text
+在 Multica 选定 AI client/runtime
+  -> 用户在目标项目根目录手动运行 openspec init --tools <tool-id>
+  -> 记录当前 AI client 的 propose/apply/archive 实际命令
+  -> 使用 propose 命令创建 change
+  -> 使用 apply 命令实施 change
+  -> 使用 archive 命令归档 change
+```
+
+示例：
+
+```bash
+npm install -g @fission-ai/openspec@latest
+openspec init --tools <ai-client-tool-id>
+```
+
+如果不确定 tool id，可以运行交互式初始化：
+
+```bash
+openspec init
+```
 
 ## 推荐使用方式
 
-### 轻量版
-
-适合个人项目、早期探索或需求规模较小的场景。
+### 推荐智能体
 
 ```text
-需求澄清与PRD策划官
-  -> OpenSpec变更设计官
-  -> 代码实现智能体
-  -> 交付验收与归档审查官
+OpenSpec流程协调官
+  -> 需求上下文整理官
+  -> OpenSpec实施推进官
+  -> OpenSpec归档验收官
 ```
 
-### 完整版
+### 命令映射
 
-适合多人协作、复杂需求、长期项目或需要明确质量门禁的场景。
+不同 AI client 的 OpenSpec 命令可能不同，例如 `/opsx:propose`、`/opsx-propose`、`/prompts:opsx-apply`。使用前请记录当前 client 实际可用命令，并在智能体上下文中统一称为：
 
-```text
-OpenSpec 主协调智能体
-  -> 产品需求分析智能体
-  -> OpenSpec 规格智能体
-  -> 技术设计智能体
-  -> 任务拆解智能体
-  -> 开发执行智能体
-  -> 验收质量智能体
+| 动作 | 占位符 |
+| --- | --- |
+| 创建变更 | `<PROPOSE_COMMAND>` |
+| 实施变更 | `<APPLY_COMMAND>` |
+| 归档变更 | `<ARCHIVE_COMMAND>` |
+
+`<PROPOSE_COMMAND>` 这类文本是占位符，不建议让智能体自动猜。推荐在创建小队或复制指令前，根据当前 AI client 的实际命令一次性替换；如果同一个小队要临时切换 client，再在 issue prompt 里传入 `command_map` 覆盖。
+
+Codex 的命令映射：
+
+```yaml
+command_map:
+  propose: "/prompts:opsx-propose"
+  apply: "/prompts:opsx-apply"
+  archive: "/prompts:opsx-archive"
 ```
 
 ## 注意事项
@@ -61,7 +95,7 @@ OpenSpec 主协调智能体
 ## 参考
 
 - [Multica Docs](https://multica.ai/docs)
-- [OpenSpec 中文文档](https://radebit.github.io/OpenSpec-Docs-zh/#overview)
+- [OpenSpec Docs](https://github.com/Fission-AI/OpenSpec)
 
 ## License
 

@@ -2,167 +2,136 @@
 
 本文件提供可直接复制到 Multica issue、评论或 chat 中的示例提示词。
 
-## 1. 使用轻量四智能体流程
+## 1. 使用前检查
 
 ```text
-请按 OpenSpec 轻量流程分析并规划这个需求：
+开始使用小队前，用户先自行确认：
+
+1. Multica agent runtime 已选定为本次要使用的 AI client。
+2. 已在目标项目根目录手动运行：
+
+openspec init --tools <tool-id>
+
+如果不确定 tool id，先运行交互式：
+
+openspec init
+
+3. 已确认当前 AI client 的命令映射：
+
+command_map:
+  propose: "<PROPOSE_COMMAND>"
+  apply: "<APPLY_COMMAND>"
+  archive: "<ARCHIVE_COMMAND>"
+
+说明：这里的 <PROPOSE_COMMAND> / <APPLY_COMMAND> / <ARCHIVE_COMMAND> 是占位符。固定使用一个 AI client 时，建议在创建小队或复制智能体指令前一次性替换成真实命令；不建议让智能体自动猜。
+
+Codex 示例：
+
+command_map:
+  propose: "/prompts:opsx-propose"
+  apply: "/prompts:opsx-apply"
+  archive: "/prompts:opsx-archive"
+
+确认完成后，再把需求交给 OpenSpec 官方命令小队。
+```
+
+## 2. 整理需求上下文
+
+```text
+@需求上下文整理官
+请整理以下需求，输出可交给 <PROPOSE_COMMAND> 的上下文。
 
 <在这里填写需求>
 
 要求：
-- 先做需求澄清和 PRD。
-- 再生成 OpenSpec proposal、Delta specs、design 和 tasks。
-- 再由代码实现智能体按 tasks 修改代码、补充测试并运行验证。
-- 最后给出验收检查点和是否可以 sync/archive 的判断。
+- 输出目标、范围、非范围、验收标准、风险和待澄清问题。
+- 建议一个 kebab-case change-id。
+- 不要手写 proposal.md、specs、design.md 或 tasks.md。
+- 不要仿写 OpenSpec 文件结构。
 ```
 
-## 2. 调用需求澄清与PRD策划官
+## 3. 准备 propose
 
 ```text
-@需求澄清与PRD策划官
-请分析这个需求并产出 PRD、用户故事、范围、非范围、成功指标、验收标准和待澄清问题：
+@OpenSpec流程协调官
+请基于上面的需求上下文直接推进 propose 动作。
 
-<在这里填写需求>
-```
-
-## 3. 调用 OpenSpec变更设计官
-
-```text
-@OpenSpec变更设计官
-请基于上面的 PRD 产出 OpenSpec 变更方案，包含：
-
-- change-id
-- proposal.md
-- Delta specs
-- requirements
-- scenarios
-- design.md
-- tasks.md
-```
-
-## 4. 调用交付验收与归档审查官
-
-```text
-@交付验收与归档审查官
-请基于 PRD、OpenSpec 产物、实现说明和测试结果做验收，判断是否可以 sync/archive。
-
-请输出：
-- pass / warning / fail 结论
-- OpenSpec requirement 覆盖检查
-- PRD 验收标准检查
-- tasks 完成度
-- 测试结果
-- 阻塞问题
-- 残余风险
-- 归档前必须完成的事项
-```
-
-## 5. 调用代码实现智能体
-
-```text
-@代码实现智能体
-请基于上面的 OpenSpec proposal、Delta specs、design 和 tasks 实施代码修改。
+command_map:
+  propose: "<PROPOSE_COMMAND>"
+  apply: "<APPLY_COMMAND>"
+  archive: "<ARCHIVE_COMMAND>"
 
 要求：
-- 只实现 tasks 范围内的内容。
-- 修改必要的源码和测试。
-- 对代码文件运行项目对应的格式化命令。
-- 运行相关测试或说明无法运行的原因。
-- 输出 changed_files、tests、known_deviations 和 remaining_work。
+- 只使用 command_map.propose 对应的实际命令。
+- 不要手写 OpenSpec 产物。
+- 如果当前环境不能执行 propose 命令，请输出 blocked 并说明原因；不要把命令只作为用户待办。
 ```
 
-## 6. 使用完整版七智能体流程
+## 4. 推进 apply
 
 ```text
-请按 OpenSpec 完整流程规划并执行这个需求：
+@OpenSpec实施推进官
+change-id 是 <change-id>。
+propose 已完成，OpenSpec 生成的变更已经确认可以进入实现。
 
-<在这里填写需求>
+command_map:
+  propose: "<PROPOSE_COMMAND>"
+  apply: "<APPLY_COMMAND>"
+  archive: "<ARCHIVE_COMMAND>"
+
+请直接推进 apply 实现阶段。
 
 要求：
-- 先由产品需求分析智能体产出 PRD。
-- 再由 OpenSpec 规格智能体产出 proposal 和 Delta specs。
-- 再由技术设计智能体产出 design.md。
-- 再由任务拆解智能体产出 tasks.md。
-- tasks.md 确认后再进入开发执行。
-- 最后由验收质量智能体做 verify，并给出是否可以 sync/archive 的结论。
+- 只围绕已确认的 change 范围推进。
+- 不要修改需求范围。
+- 只围绕 command_map.apply 对应的实际命令推进，不引入其他 OpenSpec 动作。
+- 如果当前环境不能执行 apply 命令，请输出 blocked 并说明原因；不要把命令只作为用户待办。
 ```
 
-## 7. 调用 OpenSpec 主协调智能体
+## 5. 归档前检查
 
 ```text
-@OpenSpec 主协调智能体
-请协调以下需求的 OpenSpec 工作流：
+@OpenSpec归档验收官
+change-id 是 <change-id>。
+apply 已完成，以下是实现说明和测试结果：
 
+command_map:
+  propose: "<PROPOSE_COMMAND>"
+  apply: "<APPLY_COMMAND>"
+  archive: "<ARCHIVE_COMMAND>"
+
+<填写实现说明和测试结果>
+
+要求：
+- 判断是否满足 archive 条件。
+- 列出阻塞问题、警告和必须修复项。
+- 只围绕 command_map.archive 对应的实际命令判断归档条件，不引入其他 OpenSpec 动作。
+- 如果满足归档条件，请直接执行 archive 命令。
+- 如果当前环境不能执行 archive 命令，请输出 blocked 并说明原因；不要把命令只作为用户待办。
+```
+
+## 6. 使用 Squad 自动流程
+
+```text
+@OpenSpec流程协调官
+请按 OpenSpec 官方命令小队的自动流程处理这个需求：
+
+command_map:
+  propose: "<PROPOSE_COMMAND>"
+  apply: "<APPLY_COMMAND>"
+  archive: "<ARCHIVE_COMMAND>"
+
+需求：
 <在这里填写需求>
-
-请判断当前应进入哪个阶段，并生成给下一个智能体的提示词。
-```
-
-## 8. 调用产品需求分析智能体
-
-```text
-@产品需求分析智能体
-请基于以下需求做产品需求分析，并输出 PRD、用户故事、范围、非范围、成功指标、验收标准和待澄清问题：
-
-<在这里填写需求>
-```
-
-## 9. 调用 OpenSpec 规格智能体
-
-```text
-@OpenSpec 规格智能体
-请把上面的 PRD 转成 OpenSpec 变更方案，包含 change-id、proposal.md、Delta spec、requirements 和 scenarios。
-```
-
-## 10. 调用技术设计智能体
-
-```text
-@技术设计智能体
-请基于这个 OpenSpec proposal 和 specs 输出技术设计，包括影响范围、接口、数据模型、权限、状态流、风险和测试策略。
-```
-
-## 11. 调用任务拆解智能体
-
-```text
-@任务拆解智能体
-请基于 OpenSpec specs 和 design.md 拆解 tasks.md，要求每项任务可执行、可验证，并标出依赖关系。
-```
-
-## 12. 调用开发执行智能体
-
-```text
-@开发执行智能体
-请按 tasks.md 实施这个 OpenSpec change。每完成一项任务更新状态，并补充必要测试。
-```
-
-## 13. 调用验收质量智能体
-
-```text
-@验收质量智能体
-请根据 PRD、OpenSpec requirements、scenarios、design.md、tasks.md 和代码变更做验收，输出通过、警告或失败结论。
-```
-
-## 14. Squad 自动流转提示词
-
-```text
-请按 OpenSpec Squad 流程处理这个需求：
-
-<在这里填写需求>
-
-固定阶段：
-1. 产品需求分析
-2. OpenSpec 规格
-3. 技术设计
-4. 任务拆解
-5. 开发执行
-6. 验收质量
-7. 主协调总结与 sync/archive 判断
 
 规则：
-- 每次只委派给当前阶段最合适的一个成员。
-- 不要跳过 OpenSpec 规格阶段。
-- 不要在 tasks.md 完成前触发开发执行智能体。
+- 不要手写 OpenSpec 文件。
+- 只使用 command_map 中的 propose、apply、archive 三类动作命令。
+- 需求不清楚时，@需求上下文整理官。
+- 需求清楚后由 @OpenSpec流程协调官 执行 command_map.propose。
+- propose 完成后，@OpenSpec实施推进官。
+- apply 完成后，@OpenSpec归档验收官。
 - 如果成员输出包含 blocked、warning、open_questions，先处理阻塞或派回上游修正。
-- 委派后停止，等待成员回复触发下一轮。
+- @mention 下游后停止，等待成员回复或平台重新触发。
 - 总结、感谢、确认完成时不要 @mention 成员，避免循环触发。
 ```
