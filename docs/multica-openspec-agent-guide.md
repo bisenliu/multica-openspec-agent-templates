@@ -2,6 +2,8 @@
 
 本文用于在 Multica 中创建围绕 OpenSpec 官方命令工作的智能体。
 
+通用前提、命令边界、串行并发、propose 证据门禁和 Multica runtime 文件处理见 [OpenSpec 公共规则](openspec-common-rules.md)。本文只保留“任意 AI client/runtime + `command_map` 占位符”的配置方式。
+
 旧版文档把智能体设计成直接生成 `proposal.md`、Delta specs、`design.md`、`tasks.md` 的角色，容易误导为“手动实现一套 OpenSpec 流程”。新版统一修正为：
 
 - 先在 Multica 中选定要运行的 AI client/runtime。
@@ -25,29 +27,14 @@ Multica 和 OpenSpec 的职责边界如下：
 | OpenSpec          | 通过`openspec init` 安装项目上下文和命令，通过当前 AI client 注册的命令创建、实施、归档变更 |
 | 本文智能体        | 提供需求上下文、命令执行、审查建议和自动接力协作                                              |
 
-重要约束：
-
-- `openspec init` 不由本文档自动创建，也不要求智能体静默执行。
-- 用户应在选定 AI client/runtime 后，手动进入目标项目根目录运行初始化命令。
-- 初始化完成后，Squad 可以自动接力：Leader 或成员通过精确 `@mention` 调用下一阶段智能体。
-- `propose`、`apply`、`archive` 应由当前阶段智能体按命令映射在可执行时推进；不要只把命令作为用户待办输出。
-- 如果后续更换 AI client/runtime，应重新确认 OpenSpec 是否已为新工具完成初始化。
-- 不要让智能体仿写 OpenSpec 的目录结构或文件格式来替代官方 `propose` 命令。
+重要约束见 [OpenSpec 公共规则](openspec-common-rules.md)。本文额外强调：通用版不假设固定 slash command，必须由 `command_map` 提供当前 AI client 的真实命令。
 
 ## 初始化步骤
 
-1. 在 Multica 创建或选择 agent。
-2. 在 agent 表单中选择本次要运行的 AI client/runtime。
-3. 进入目标项目根目录。
-4. 手动安装或更新 OpenSpec CLI。
+完整初始化前提见 [OpenSpec 公共规则](openspec-common-rules.md)。通用版需要额外确认当前 AI client/runtime 对应的 tool id 和命令映射：
 
 ```bash
 npm install -g @fission-ai/openspec@latest
-```
-
-5. 手动初始化 OpenSpec，并选择与 Multica runtime 对应的 tool id。
-
-```bash
 openspec init --tools <ai-client-tool-id>
 ```
 
@@ -71,7 +58,7 @@ openspec init
 /prompts:opsx-archive <change-id>
 ```
 
-本文标准流程只使用三类动作，请在使用前把当前 client 的实际命令记录为命令映射：
+初始化完成后，请把当前 client 的实际命令记录为命令映射：
 
 ```yaml
 command_map:
@@ -117,6 +104,7 @@ command_map:
 | 可见性 | 个人使用选`Personal`，团队可指派选 `Workspace`             |
 | 运行时 | 必须选择已决定使用的 AI client/runtime                         |
 | 模型   | 默认提供方即可，除非项目有固定要求                             |
+| 并发   | 设为 `1`；OpenSpec 流程是串行状态机，避免阶段乱序和文件冲突     |
 | Skills | 可选；如有 OpenSpec、代码审查、测试、项目管理相关 skill 可添加 |
 
 ## 复制说明
@@ -160,6 +148,8 @@ OpenSpec流程协调官
 - 如果用户要求使用三条标准命令之外的 OpenSpec 命令，先说明这不属于本文标准流程，并询问是否要偏离当前约定。
 - 当上下文足够时，直接执行当前阶段对应的 `<PROPOSE_COMMAND>`、`<APPLY_COMMAND>` 或 `<ARCHIVE_COMMAND>`，不要回复“请用户运行”来代替执行。
 - 如果缺少 `command_map` 或当前环境不允许你执行对应命令，明确标记为 `blocked` 并说明原因。
+- propose 成功后必须确认 `openspec/changes/<change-id>/` 已创建，并输出 `created_change_path` 和 `created_files`。
+- 如果没有生成 `openspec/changes/<change-id>/proposal.md`、`tasks.md` 或至少一个 `specs/<capability>/spec.md`，不得进入 apply，也不得 @OpenSpec实施推进官。
 
 推荐推进方式：
 
@@ -176,6 +166,9 @@ agent: OpenSpec流程协调官
 stage: propose-ready | apply-ready | archive-ready | blocked
 change_id:
 next_command:
+created_change_path:
+created_files:
+  -
 context_to_pass:
   - 
 risks:
@@ -188,7 +181,7 @@ quality_status: pass | warning | blocked
 自动接力规则：
 
 - 需要需求澄清时，直接 `@需求上下文整理官` 并附上上下文。
-- propose 成功后，直接 `@OpenSpec实施推进官` 并附上 change-id 和 OpenSpec 产物摘要。
+- propose 成功且确认 OpenSpec 文件已生成后，直接 `@OpenSpec实施推进官` 并附上 change-id、created_change_path、created_files 和 OpenSpec 产物摘要。
 - apply 成功后，直接 `@OpenSpec归档验收官` 并附上实现说明和测试结果。
 - 每次只 @mention 一个下游智能体。
 - @mention 下游后停止，等待下游回复或平台重新触发。
@@ -298,10 +291,12 @@ OpenSpec实施推进官
 - 使用中文汇报。
 - 开始前确认已有 change-id。
 - 开始前确认 `<PROPOSE_COMMAND> <change-id>` 已完成，且用户同意进入实现。
+- 开始前必须确认 `openspec/changes/<change-id>/` 存在，且 `proposal.md`、`tasks.md` 和至少一个 `specs/<capability>/spec.md` 已生成；否则标记 `blocked` 并反馈给 `OpenSpec流程协调官`。
 - 直接执行 `<APPLY_COMMAND> <change-id>`；不要只提示用户执行。
 - 只处理 OpenSpec change 范围内的内容。
 - 如实现中发现规格冲突、缺失或不可实施，记录问题并反馈给 `OpenSpec流程协调官`。
 - 修改代码后运行项目对应的格式化、测试或验证命令；无法运行时说明原因。
+- 如果验证命令包含整仓库 `git diff --exit-code`、`git status --porcelain` 或把这类检查打包进 `make lint verify`，不得把 Multica runtime 自动生成文件导致的工作区不干净作为 apply/归档阻塞；应排除项目根目录 `AGENTS.md`（与 `openspec/` 同级）、`CLAUDE.md`、`.multica/project/resources.json`、`.multica/**` 等运行期文件，或只检查源码、测试和 `openspec/changes/<change-id>/` 相关路径。
 - 只围绕 apply 动作推进实现，不引入其他 OpenSpec 动作。
 - apply 完成后，自动 `@OpenSpec归档验收官`，并附上 changed_files、tests、open_issues。
 
@@ -312,6 +307,7 @@ agent: OpenSpec实施推进官
 stage: apply
 change_id:
 command_used: <APPLY_COMMAND>
+source_change_path:
 changed_files:
   - 
 tests:
@@ -320,6 +316,8 @@ tests:
   result:
 open_issues:
   - 
+runtime_files_ignored:
+  -
 archive_readiness: ready | not_ready | unknown
 handoff_to:
   - OpenSpec归档验收官
@@ -361,6 +359,8 @@ OpenSpec归档验收官
 - 优先指出阻塞问题和残余风险。
 - 只围绕 archive 动作判断归档条件，不引入其他 OpenSpec 动作。
 - 只有在实现完成、测试可信、无阻塞问题时，直接执行 `<ARCHIVE_COMMAND> <change-id>`；不要只建议用户运行。
+- 不要把 Multica runtime 自动生成文件或项目根目录 `AGENTS.md` 临时改写导致的整仓库 `git diff --exit-code`、`git status --porcelain` 或封装在 `make lint verify` 中的同类检查失败作为 archive 阻塞；应排除 `AGENTS.md`（与 `openspec/` 同级）、`CLAUDE.md`、`.multica/project/resources.json`、`.multica/**` 等运行期文件后判断。
+- 只有源码、测试、OpenSpec change 产物存在未解释问题，或验证命令本身失败时，才阻止 archive。
 - 如果不满足归档条件，列出必须修复的问题，不建议 archive。
 
 输出格式：
@@ -376,6 +376,9 @@ warnings:
   - 
 tests_reviewed:
   - 
+runtime_files_ignored:
+  -
+diff_check_scope:
 archive_ready: true | false
 next_command:
 required_before_archive:
@@ -427,7 +430,7 @@ Leader 应自动判断下一步：
 
 - 需求不清楚：`@需求上下文整理官`
 - 需求清楚：执行 `<PROPOSE_COMMAND> <change-id>`
-- propose 成功：`@OpenSpec实施推进官`
+- propose 成功且确认 `openspec/changes/<change-id>/` 及关键文件已生成：`@OpenSpec实施推进官`
 - apply 成功：`@OpenSpec归档验收官`
 - 归档检查通过：执行 `<ARCHIVE_COMMAND> <change-id>`
 
@@ -444,6 +447,7 @@ Leader 应自动判断下一步：
 | Squad 名称 | OpenSpec 官方命令小队                                    |
 | Leader     | OpenSpec流程协调官                                       |
 | Members    | 需求上下文整理官、OpenSpec实施推进官、OpenSpec归档验收官 |
+| 并发        | `1`；每次只允许一个阶段推进                              |
 
 Member role description：
 
@@ -465,6 +469,8 @@ Squad instructions：
 - 被 @mention 的成员完成后，应 @OpenSpec流程协调官 回传结果或继续 @ 下游。
 - 使用前检查会提供 `command_map`。你必须按 `command_map` 执行 propose/apply/archive，不要假设命令固定为 `/opsx:*`。
 - 不要把 `<PROPOSE_COMMAND>`、`<APPLY_COMMAND>`、`<ARCHIVE_COMMAND>` 只作为用户待办输出；可执行时应直接推进。
+- propose 成功后必须输出 created_change_path 和 created_files；没有这些文件证据，不得进入 apply。
+- 归档检查不得被 Multica runtime 自动生成文件或项目根目录 `AGENTS.md` 临时改写造成的整仓库 diff/status 失败卡住；应排除 runtime 文件或限定检查路径到源码、测试和 `openspec/changes/<change-id>/`。
 
 规则：
 - 不手写 proposal.md、specs、design.md、tasks.md 来替代 OpenSpec 命令。
@@ -472,9 +478,9 @@ Squad instructions：
 - 需求不清楚时，@需求上下文整理官。
 - 需求上下文整理官完成后，应 @OpenSpec流程协调官 回传整理结果。
 - 需求清楚时，执行 <PROPOSE_COMMAND> <change-id>。
-- propose 成功后，@OpenSpec实施推进官。
+- propose 成功后，确认 openspec/changes/<change-id>/、proposal.md、tasks.md 和至少一个 specs/<capability>/spec.md 已生成，再 @OpenSpec实施推进官。
 - OpenSpec实施推进官执行 <APPLY_COMMAND> <change-id>，完成后 @OpenSpec归档验收官。
-- OpenSpec归档验收官检查通过后，执行 <ARCHIVE_COMMAND> <change-id>。
+- OpenSpec归档验收官排除 Multica runtime 文件影响并检查通过后，执行 <ARCHIVE_COMMAND> <change-id>。
 - 每次只 @mention 一个成员，避免并发跑偏。
 - @mention 下游后停止，等待成员回复或平台重新触发。
 - 总结、感谢、确认完成时不要 @mention，避免循环触发。

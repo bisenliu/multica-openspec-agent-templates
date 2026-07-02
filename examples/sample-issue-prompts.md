@@ -2,6 +2,8 @@
 
 本文件提供可直接复制到 Multica issue、评论或 chat 中的示例提示词。
 
+公共前提和硬约束见 [OpenSpec 公共规则](../docs/openspec-common-rules.md)。本文件保留可直接复制的提示词，因此会重复少量关键规则。
+
 ## 1. 使用前检查
 
 ```text
@@ -65,6 +67,8 @@ command_map:
 - 只使用 command_map.propose 对应的实际命令。
 - 不要手写 OpenSpec 产物。
 - 如果当前环境不能执行 propose 命令，请输出 blocked 并说明原因；不要把命令只作为用户待办。
+- propose 成功后必须输出 created_change_path 和 created_files。
+- 如果没有生成 openspec/changes/<change-id>/proposal.md、tasks.md 和至少一个 specs/<capability>/spec.md，不要进入 apply。
 ```
 
 ## 4. 推进 apply
@@ -84,6 +88,7 @@ command_map:
 要求：
 - 只围绕已确认的 change 范围推进。
 - 不要修改需求范围。
+- 开始前必须确认 openspec/changes/<change-id>/ 存在，且 proposal.md、tasks.md 和至少一个 specs/<capability>/spec.md 已生成。
 - 只围绕 command_map.apply 对应的实际命令推进，不引入其他 OpenSpec 动作。
 - 如果当前环境不能执行 apply 命令，请输出 blocked 并说明原因；不要把命令只作为用户待办。
 ```
@@ -106,6 +111,7 @@ command_map:
 - 判断是否满足 archive 条件。
 - 列出阻塞问题、警告和必须修复项。
 - 只围绕 command_map.archive 对应的实际命令判断归档条件，不引入其他 OpenSpec 动作。
+- 如果项目验证命令包含整仓库 git diff/status 检查，不要把 Multica runtime 自动生成或临时修改的 AGENTS.md（与 openspec/ 同级）、CLAUDE.md、.multica/project/resources.json、.multica/** 导致的工作区不干净作为 archive 阻塞；请排除这些运行期文件或限定检查源码、测试和 openspec/changes/<change-id>/ 相关路径。
 - 如果满足归档条件，请直接执行 archive 命令。
 - 如果当前环境不能执行 archive 命令，请输出 blocked 并说明原因；不要把命令只作为用户待办。
 ```
@@ -127,6 +133,8 @@ command_map:
 规则：
 - 不要手写 OpenSpec 文件。
 - 只使用 command_map 中的 propose、apply、archive 三类动作命令。
+- propose 成功后必须输出 created_change_path 和 created_files；没有 OpenSpec 文件证据，不得进入 apply。
+- archive 前不要被 Multica runtime 自动生成文件或 AGENTS.md（与 openspec/ 同级）临时改写造成的整仓库 diff/status 失败卡住；排除 AGENTS.md、CLAUDE.md、.multica/project/resources.json、.multica/** 后再判断。
 - 需求不清楚时，@需求上下文整理官。
 - 需求清楚后由 @OpenSpec流程协调官 执行 command_map.propose。
 - propose 完成后，@OpenSpec实施推进官。

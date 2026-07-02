@@ -11,8 +11,22 @@
 
 ## 文档
 
+- [OpenSpec 公共规则](docs/openspec-common-rules.md)
 - [OpenSpec 智能体配置指南](docs/multica-openspec-agent-guide.md)
+- [Codex 三智能体轻量指南](docs/multica-openspec-codex-3-agent-guide.md)
+- [Codex 完整小队指南](docs/multica-openspec-codex-agent-guide.md)
 - [Issue 示例提示词](examples/sample-issue-prompts.md)
+
+## 如何选择
+
+先阅读 [OpenSpec 公共规则](docs/openspec-common-rules.md)，再按使用场景选择一份可复制指南：
+
+| 场景 | 推荐文档 | 说明 |
+| --- | --- | --- |
+| Codex 日常需求，追求更少接力和接近 CLI 的速度 | [Codex 三智能体轻量指南](docs/multica-openspec-codex-3-agent-guide.md) | 3 个 agent，无额外 Leader，入口直接 `@OpenSpec提案官` |
+| Codex 复杂需求、需求不清楚或风险较高 | [Codex 完整小队指南](docs/multica-openspec-codex-agent-guide.md) | 4 个 agent，包含流程协调和需求上下文整理 |
+| 非 Codex runtime，或同一套模板要适配不同 AI client | [OpenSpec 智能体配置指南](docs/multica-openspec-agent-guide.md) | 使用 `command_map` 和命令占位符 |
+| 手动触发或 issue/chat 里复制提示词 | [Issue 示例提示词](examples/sample-issue-prompts.md) | 提供分阶段和自动流程示例 |
 
 ## 适用场景
 
@@ -23,7 +37,7 @@
 
 ## 初始化前提
 
-OpenSpec 初始化不是自动创建步骤，也不应由智能体静默完成。用户必须先手动 init，之后小队才能自动流转。
+OpenSpec 初始化、命令边界、串行并发、propose 证据门禁和 Multica runtime 文件处理统一维护在 [OpenSpec 公共规则](docs/openspec-common-rules.md) 中。这里保留最短正确顺序：
 
 正确顺序：
 
@@ -51,14 +65,11 @@ openspec init
 
 ## 推荐使用方式
 
-### 推荐智能体
+### 默认选择
 
-```text
-OpenSpec流程协调官
-  -> 需求上下文整理官
-  -> OpenSpec实施推进官
-  -> OpenSpec归档验收官
-```
+- 使用 Codex 时，优先从 [Codex 三智能体轻量指南](docs/multica-openspec-codex-3-agent-guide.md) 开始。
+- 需求复杂、上下文不清楚或需要更强审查时，使用 [Codex 完整小队指南](docs/multica-openspec-codex-agent-guide.md)。
+- 使用其他 AI client/runtime 时，使用 [OpenSpec 智能体配置指南](docs/multica-openspec-agent-guide.md)。
 
 ### 命令映射
 
@@ -83,14 +94,7 @@ command_map:
 
 ## 注意事项
 
-如果 Multica project resource 使用 local directory，Multica runtime 可能会在目录根写入 `AGENTS.md`、`CLAUDE.md` 或 `.multica/project/resources.json` 等运行时上下文文件。
-
-如果不希望主仓库被写入，建议：
-
-- 使用独立 git worktree；
-- 或使用包装目录；
-- 或改用远程 repo resource；
-- 不要只依赖提示词阻止写入，因为 runtime 文件通常在 agent 看到提示词之前就已经写入。
+所有指南共享的注意事项见 [OpenSpec 公共规则](docs/openspec-common-rules.md)。重点包括：agent 不替代 `openspec init`、所有相关 agent 和 Squad 并发设为 `1`、没有 OpenSpec change 文件证据不得进入 `apply`、归档前排除 Multica runtime 文件影响。
 
 ## 参考
 
