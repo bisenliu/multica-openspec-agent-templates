@@ -5,12 +5,12 @@
 本仓库提供两套配置：
 
 - **7 智能体完整版**：覆盖产品需求分析、OpenSpec 规格、技术设计、任务拆解、开发执行、验收质量与主协调。
-- **3 智能体轻量版**：覆盖需求澄清、OpenSpec 变更设计与交付验收。
+- **4 智能体轻量版**：覆盖需求澄清、OpenSpec 变更设计、代码实现与交付验收。
 
 ## 文档
 
 - [完整版智能体配置](docs/multica-agent-manual-openspec-prd.md)
-- [轻量三智能体配置](docs/multica-agent-lite-3-openspec.md)
+- [轻量四智能体配置](docs/multica-agent-lite-4-openspec.md)
 - [Issue 示例提示词](examples/sample-issue-prompts.md)
 
 ## 适用场景
@@ -18,7 +18,7 @@
 - 在 Multica 中手动创建产品研发智能体。
 - 使用 `@mention` 按阶段调用智能体。
 - 使用 Squad 自动流转 OpenSpec 工作流。
-- 将 PRD、OpenSpec proposal、Delta specs、design、tasks、verify 串成稳定协作流程。
+- 将 PRD、OpenSpec proposal、Delta specs、design、tasks、代码实现、verify 串成稳定协作流程。
 
 ## 推荐使用方式
 
@@ -29,6 +29,7 @@
 ```text
 需求澄清与PRD策划官
   -> OpenSpec变更设计官
+  -> 代码实现智能体
   -> 交付验收与归档审查官
 ```
 

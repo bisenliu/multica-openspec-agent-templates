@@ -2,7 +2,7 @@
 
 本文件提供可直接复制到 Multica issue、评论或 chat 中的示例提示词。
 
-## 1. 使用轻量三智能体流程
+## 1. 使用轻量四智能体流程
 
 ```text
 请按 OpenSpec 轻量流程分析并规划这个需求：
@@ -12,6 +12,7 @@
 要求：
 - 先做需求澄清和 PRD。
 - 再生成 OpenSpec proposal、Delta specs、design 和 tasks。
+- 再由代码实现智能体按 tasks 修改代码、补充测试并运行验证。
 - 最后给出验收检查点和是否可以 sync/archive 的判断。
 ```
 
@@ -56,7 +57,21 @@
 - 归档前必须完成的事项
 ```
 
-## 5. 使用完整版七智能体流程
+## 5. 调用代码实现智能体
+
+```text
+@代码实现智能体
+请基于上面的 OpenSpec proposal、Delta specs、design 和 tasks 实施代码修改。
+
+要求：
+- 只实现 tasks 范围内的内容。
+- 修改必要的源码和测试。
+- 对代码文件运行项目对应的格式化命令。
+- 运行相关测试或说明无法运行的原因。
+- 输出 changed_files、tests、known_deviations 和 remaining_work。
+```
+
+## 6. 使用完整版七智能体流程
 
 ```text
 请按 OpenSpec 完整流程规划并执行这个需求：
@@ -72,7 +87,7 @@
 - 最后由验收质量智能体做 verify，并给出是否可以 sync/archive 的结论。
 ```
 
-## 6. 调用 OpenSpec 主协调智能体
+## 7. 调用 OpenSpec 主协调智能体
 
 ```text
 @OpenSpec 主协调智能体
@@ -83,7 +98,7 @@
 请判断当前应进入哪个阶段，并生成给下一个智能体的提示词。
 ```
 
-## 7. 调用产品需求分析智能体
+## 8. 调用产品需求分析智能体
 
 ```text
 @产品需求分析智能体
@@ -92,42 +107,42 @@
 <在这里填写需求>
 ```
 
-## 8. 调用 OpenSpec 规格智能体
+## 9. 调用 OpenSpec 规格智能体
 
 ```text
 @OpenSpec 规格智能体
 请把上面的 PRD 转成 OpenSpec 变更方案，包含 change-id、proposal.md、Delta spec、requirements 和 scenarios。
 ```
 
-## 9. 调用技术设计智能体
+## 10. 调用技术设计智能体
 
 ```text
 @技术设计智能体
 请基于这个 OpenSpec proposal 和 specs 输出技术设计，包括影响范围、接口、数据模型、权限、状态流、风险和测试策略。
 ```
 
-## 10. 调用任务拆解智能体
+## 11. 调用任务拆解智能体
 
 ```text
 @任务拆解智能体
 请基于 OpenSpec specs 和 design.md 拆解 tasks.md，要求每项任务可执行、可验证，并标出依赖关系。
 ```
 
-## 11. 调用开发执行智能体
+## 12. 调用开发执行智能体
 
 ```text
 @开发执行智能体
 请按 tasks.md 实施这个 OpenSpec change。每完成一项任务更新状态，并补充必要测试。
 ```
 
-## 12. 调用验收质量智能体
+## 13. 调用验收质量智能体
 
 ```text
 @验收质量智能体
 请根据 PRD、OpenSpec requirements、scenarios、design.md、tasks.md 和代码变更做验收，输出通过、警告或失败结论。
 ```
 
-## 13. Squad 自动流转提示词
+## 14. Squad 自动流转提示词
 
 ```text
 请按 OpenSpec Squad 流程处理这个需求：
