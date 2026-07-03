@@ -17,7 +17,7 @@ openspec init --tools <ai-client-tool-id>
 openspec init
 ```
 
-初始化后应记录当前 AI client 实际可用的三类命令：
+初始化后应记录当前 AI client 实际可用的三类命令，或所选流程需要的命令子集：
 
 ```yaml
 command_map:
@@ -26,7 +26,7 @@ command_map:
   archive: "<ARCHIVE_COMMAND>"
 ```
 
-Codex 固定使用：
+Codex 完整三段式命令为：
 
 ```yaml
 command_map:
@@ -35,11 +35,13 @@ command_map:
   archive: "/prompts:opsx-archive"
 ```
 
+如果所选模板只覆盖 propose + apply，则只使用前两条命令，并明确不归档。
+
 如果后续更换 AI client/runtime，应重新确认 OpenSpec 是否已为新工具完成初始化。
 
 ## 命令边界
 
-- 标准流程只使用 `propose`、`apply`、`archive` 三类动作。
+- 模板只在 `propose`、`apply`、`archive` 动作集合内选择；部分轻量模板可以只使用 `propose` 和 `apply`，并明确不归档。
 - Agent 不要手写 `proposal.md`、Delta specs、`design.md`、`tasks.md` 来替代 OpenSpec 命令。
 - 当上下文足够且环境允许时，当前阶段 agent 应直接推进对应命令，不要只把命令作为用户待办输出。
 - `<PROPOSE_COMMAND>`、`<APPLY_COMMAND>`、`<ARCHIVE_COMMAND>` 是占位符，不应由 agent 自动猜测。

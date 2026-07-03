@@ -143,3 +143,25 @@ command_map:
 - @mention 下游后停止，等待成员回复或平台重新触发。
 - 总结、感谢、确认完成时不要 @mention 成员，避免循环触发。
 ```
+
+## 7. Codex 单智能体 propose + apply
+
+```text
+@OpenSpec提案实施官
+
+请按 OpenSpec Codex 提案实施流程处理这个需求，只使用：
+- /prompts:opsx-propose
+- /prompts:opsx-apply
+
+需求：
+<在这里填写需求>
+
+可选 change-id：
+<如果没有就留空，由 OpenSpec提案实施官生成>
+
+要求：
+- 不调用 /prompts:opsx-archive。
+- 不手写 OpenSpec 文件。
+- propose 成功后必须输出 created_change_path 和 created_files；没有 OpenSpec 文件证据不得进入 apply。
+- apply 完成后运行必要测试并停止，不做归档。
+```

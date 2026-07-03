@@ -6,13 +6,14 @@
 
 1. 先在 Multica 中选定要运行的 AI client/runtime。
 2. 用户进入目标项目根目录，手动运行 `openspec init`。
-3. 后续只通过 OpenSpec 的 `propose`、`apply`、`archive` 三类动作推进 change；具体斜杠命令以当前 AI client 实际注册的命令为准。
+3. 后续只通过 OpenSpec 的 `propose`、`apply`、`archive` 三类动作或其子集推进 change；具体斜杠命令以当前 AI client 实际注册的命令为准。
 4. Multica 智能体负责整理上下文、协调分工、审查风险，并通过 Squad 自动 `@mention` 下游智能体；但不替代 `openspec init`。
 
 ## 文档
 
 - [OpenSpec 公共规则](docs/openspec-common-rules.md)
 - [OpenSpec 智能体配置指南](docs/multica-openspec-agent-guide.md)
+- [Codex 提案实施单智能体指南](docs/multica-openspec-codex-propose-apply-agent-guide.md)
 - [Codex 三智能体轻量指南](docs/multica-openspec-codex-3-agent-guide.md)
 - [Codex 完整小队指南](docs/multica-openspec-codex-agent-guide.md)
 - [Issue 示例提示词](examples/sample-issue-prompts.md)
@@ -23,6 +24,7 @@
 
 | 场景 | 推荐文档 | 说明 |
 | --- | --- | --- |
+| Codex 只需要 propose + apply，不需要自动归档 | [Codex 提案实施单智能体指南](docs/multica-openspec-codex-propose-apply-agent-guide.md) | 1 个 agent，只使用 `/prompts:opsx-propose` 和 `/prompts:opsx-apply` |
 | Codex 日常需求，追求更少接力和接近 CLI 的速度 | [Codex 三智能体轻量指南](docs/multica-openspec-codex-3-agent-guide.md) | 3 个 agent，无额外 Leader，入口直接 `@OpenSpec提案官` |
 | Codex 复杂需求、需求不清楚或风险较高 | [Codex 完整小队指南](docs/multica-openspec-codex-agent-guide.md) | 4 个 agent，包含流程协调和需求上下文整理 |
 | 非 Codex runtime，或同一套模板要适配不同 AI client | [OpenSpec 智能体配置指南](docs/multica-openspec-agent-guide.md) | 使用 `command_map` 和命令占位符 |
@@ -44,10 +46,10 @@ OpenSpec 初始化、命令边界、串行并发、propose 证据门禁和 Multi
 ```text
 在 Multica 选定 AI client/runtime
   -> 用户在目标项目根目录手动运行 openspec init --tools <tool-id>
-  -> 记录当前 AI client 的 propose/apply/archive 实际命令
+  -> 记录当前 AI client 的 propose/apply/archive 实际命令或所选流程需要的命令子集
   -> 使用 propose 命令创建 change
   -> 使用 apply 命令实施 change
-  -> 使用 archive 命令归档 change
+  -> 如果所选流程包含归档，再使用 archive 命令归档 change
 ```
 
 示例：
@@ -67,7 +69,8 @@ openspec init
 
 ### 默认选择
 
-- 使用 Codex 时，优先从 [Codex 三智能体轻量指南](docs/multica-openspec-codex-3-agent-guide.md) 开始。
+- 只需要 propose 和 apply 时，使用 [Codex 提案实施单智能体指南](docs/multica-openspec-codex-propose-apply-agent-guide.md)。
+- 需要完整 propose、apply、archive 自动流转时，使用 [Codex 三智能体轻量指南](docs/multica-openspec-codex-3-agent-guide.md)。
 - 需求复杂、上下文不清楚或需要更强审查时，使用 [Codex 完整小队指南](docs/multica-openspec-codex-agent-guide.md)。
 - 使用其他 AI client/runtime 时，使用 [OpenSpec 智能体配置指南](docs/multica-openspec-agent-guide.md)。
 
@@ -83,7 +86,7 @@ openspec init
 
 `<PROPOSE_COMMAND>` 这类文本是占位符，不建议让智能体自动猜。推荐在创建小队或复制指令前，根据当前 AI client 的实际命令一次性替换；如果同一个小队要临时切换 client，再在 issue prompt 里传入 `command_map` 覆盖。
 
-Codex 的命令映射：
+Codex 完整三段式命令映射：
 
 ```yaml
 command_map:
@@ -91,6 +94,8 @@ command_map:
   apply: "/prompts:opsx-apply"
   archive: "/prompts:opsx-archive"
 ```
+
+如果使用 Codex 提案实施单智能体，只需要前两条命令，不使用 `archive`。
 
 ## 注意事项
 
