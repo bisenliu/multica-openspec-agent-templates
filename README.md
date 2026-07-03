@@ -2,7 +2,9 @@
 
 用于在 Multica 中创建围绕 OpenSpec 官方命令工作的智能体模板。
 
-本仓库已经移除旧版“手动生成 OpenSpec proposal/spec/design/tasks”的模板，统一改为官方命令流程：
+本仓库主要维护围绕 OpenSpec 官方命令工作的智能体模板，也包含少量不进入 OpenSpec 流程的通用分析智能体。
+
+OpenSpec 模板已经移除旧版“手动生成 OpenSpec proposal/spec/design/tasks”的方式，统一改为官方命令流程：
 
 1. 先在 Multica 中选定要运行的 AI client/runtime。
 2. 用户进入目标项目根目录，手动运行 `openspec init`。
@@ -12,6 +14,7 @@
 ## 文档
 
 - [OpenSpec 公共规则](docs/openspec-common-rules.md)
+- [问题排查分析智能体指南](docs/multica-issue-analysis-agent-guide.md)
 - [OpenSpec 智能体配置指南](docs/multica-openspec-agent-guide.md)
 - [Codex 提案实施单智能体指南](docs/multica-openspec-codex-propose-apply-agent-guide.md)
 - [Codex 三智能体轻量指南](docs/multica-openspec-codex-3-agent-guide.md)
@@ -20,10 +23,11 @@
 
 ## 如何选择
 
-先阅读 [OpenSpec 公共规则](docs/openspec-common-rules.md)，再按使用场景选择一份可复制指南：
+OpenSpec 流程先阅读 [OpenSpec 公共规则](docs/openspec-common-rules.md)，再按使用场景选择一份可复制指南；非 OpenSpec 分析任务可直接选择对应智能体：
 
 | 场景 | 推荐文档 | 说明 |
 | --- | --- | --- |
+| 只分析问题、整理报告，不生成 OpenSpec 文件 | [问题排查分析智能体指南](docs/multica-issue-analysis-agent-guide.md) | 1 个通用 agent，按用户输入的资料、排除项和输出路径生成 Markdown 报告 |
 | Codex 只需要 propose + apply，不需要自动归档 | [Codex 提案实施单智能体指南](docs/multica-openspec-codex-propose-apply-agent-guide.md) | 1 个 agent，只使用 `/prompts:opsx-propose` 和 `/prompts:opsx-apply` |
 | Codex 日常需求，追求更少接力和接近 CLI 的速度 | [Codex 三智能体轻量指南](docs/multica-openspec-codex-3-agent-guide.md) | 3 个 agent，无额外 Leader，入口直接 `@OpenSpec提案官` |
 | Codex 复杂需求、需求不清楚或风险较高 | [Codex 完整小队指南](docs/multica-openspec-codex-agent-guide.md) | 4 个 agent，包含流程协调和需求上下文整理 |
@@ -34,12 +38,15 @@
 
 - 在 Multica 中手动创建产品研发智能体。
 - 使用 Squad 自动流转 OpenSpec 官方命令。
+- 使用通用分析智能体整理问题排查报告。
 - Leader 通过精确 `@mention` 自动调用当前阶段需要的成员。
 - 将需求上下文、`propose`、`apply`、`archive` 串成稳定协作流程。
 
 ## 初始化前提
 
-OpenSpec 初始化、命令边界、串行并发、propose 证据门禁和 Multica runtime 文件处理统一维护在 [OpenSpec 公共规则](docs/openspec-common-rules.md) 中。这里保留最短正确顺序：
+OpenSpec 初始化、命令边界、串行并发、propose 证据门禁和 Multica runtime 文件处理统一维护在 [OpenSpec 公共规则](docs/openspec-common-rules.md) 中。问题排查分析智能体不需要 `openspec init`。
+
+OpenSpec 流程最短正确顺序：
 
 正确顺序：
 
@@ -69,6 +76,7 @@ openspec init
 
 ### 默认选择
 
+- 只做问题排查和 Markdown 报告时，使用 [问题排查分析智能体指南](docs/multica-issue-analysis-agent-guide.md)。
 - 只需要 propose 和 apply 时，使用 [Codex 提案实施单智能体指南](docs/multica-openspec-codex-propose-apply-agent-guide.md)。
 - 需要完整 propose、apply、archive 自动流转时，使用 [Codex 三智能体轻量指南](docs/multica-openspec-codex-3-agent-guide.md)。
 - 需求复杂、上下文不清楚或需要更强审查时，使用 [Codex 完整小队指南](docs/multica-openspec-codex-agent-guide.md)。
@@ -99,7 +107,9 @@ command_map:
 
 ## 注意事项
 
-所有指南共享的注意事项见 [OpenSpec 公共规则](docs/openspec-common-rules.md)。重点包括：agent 不替代 `openspec init`、所有相关 agent 和 Squad 并发设为 `1`、没有 OpenSpec change 文件证据不得进入 `apply`、归档前排除 Multica runtime 文件影响。
+OpenSpec 相关指南共享的注意事项见 [OpenSpec 公共规则](docs/openspec-common-rules.md)。重点包括：agent 不替代 `openspec init`、所有相关 agent 和 Squad 并发设为 `1`、没有 OpenSpec change 文件证据不得进入 `apply`、归档前排除 Multica runtime 文件影响。
+
+问题排查分析智能体独立于 OpenSpec 流程，只按用户指定资料、排除项和输出路径生成 Markdown 报告。
 
 ## 参考
 
